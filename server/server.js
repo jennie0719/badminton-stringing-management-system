@@ -14,6 +14,7 @@ app.use(express.json());
 // 從 .env 檔案中讀取機密資訊
 const DATABASE_URL = process.env.DATABASE_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY;
 const PORT = process.env.PORT || 3000;
 
 // 連接到 PostgreSQL 資料庫
