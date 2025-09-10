@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>羽球穿線管理系統 - 首頁</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="top-bar"></div>
+
+    <div class="container">
+        <div class="section">
+            <h1>收拍 Collect Racket</h1>
+            <p>請輸入選手ID以開始收拍。<br>
+                Enter player ID to collect racket.
+            </p>
+            <label for="bwfId">選手 BWF ID:</label>
+            <input type="text" id="bwfId" placeholder="輸入選手ID Enter BWF ID" required>
+            <button onclick="queryPlayerAndRedirect()">查詢 Search</button>
+        </div>
+        
+        <div class="section">
+            <h1>取拍 Racket Pickup</h1>
+            <p>請輸入訂單編號以進行取拍。<br>
+                Enter order number to pick up racket.
+            </p>
+            <label for="orderId">訂單編號 Order ID:</label>
+            <input type="text" id="orderId" placeholder="輸入訂單編號 Enter order ID" required>
+            <button onclick="queryOrderAndRedirect()">查詢 Search</button>
+        </div>
+    </div>
+
+    <script>
+        // 在頁面載入時載入導航欄
+        fetch('top-bar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('top-bar').innerHTML = html;
+            });
+    </script>
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

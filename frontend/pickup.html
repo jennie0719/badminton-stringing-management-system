@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>羽球穿線管理系統 - 訂單詳情</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 新增狀態條樣式 */
+        .status-bar {
+            padding: 10px;
+            font-weight: bold;
+            color: white;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .status-1 { background: #f0ad4e; } /* 未完成 */
+        .status-2 { background: #5cb85c; } /* 已完成 */
+        .status-3 { background: #337ab7; } /* 已取拍 */
+    </style>
+</head>
+<body>
+    <div id="top-bar"></div>
+    
+    <div class="container">
+        <div id="order-details" class="section">
+            <h2 id="order-title"></h2>
+            
+            <div id="status-bar-container"></div>
+            <div id="racket-list"></div>
+
+            <div class="update-section">
+                <label for="stringer">穿線師 Stringer:</label>
+                <input type="text" id="stringer" placeholder="輸入穿線師姓名 Enter stringer’s name">
+            </div>
+
+            <div class="action-buttons">
+                <button id="print-btn" onclick="printCurOrder()" class="primary-btn">列印 Print</button>
+                <button id="pay-btn" onclick="updateOrder('payStatus', '已付清')" class="primary-btn">付清 Pay</button>
+                <button id="complete-btn" onclick="updateOrder('completeTime', new Date().toLocaleString())">完成 Complete</button>
+                <button id="pickup-btn" onclick="updateOrder('pickupTime', new Date().toLocaleString())">取拍 Pickup</button>
+            </div>
+        </div>
+        <div id="status-message" class="info-box"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('top-bar.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('top-bar').innerHTML = html;
+                });
+            
+            // 直接在頁面載入時執行查詢
+            const params = new URLSearchParams(window.location.search);
+            const orderId = params.get('orderId');
+            if (orderId) {
+                queryOrder(orderId); // 呼叫新的 queryOrder 函式
+            } else {
+                document.getElementById('status-message').textContent = '無效的訂單編號，請回到首頁重新查詢。\nInvalid order number. Return to homepage to search.';
+                document.getElementById('order-details').style.display = 'none';
+            }
+        });
+    </script>
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

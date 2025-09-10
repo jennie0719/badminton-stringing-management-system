@@ -1,0 +1,208 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+textarea {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled, input:disabled {
+    background-color: #e0e0e0;
+    color: #a0a0a0;
+    cursor: not-allowed;
+    border-color: #d0d0d0;
+    box-shadow: none;
+}
+
+.primary-btn {
+    background-color: #28a745;
+}
+
+.primary-btn:hover {
+    background-color: #218838;
+}
+
+.info-box {
+    padding: 15px;
+    background-color: #e9ecef;
+    border-left: 5px solid #007bff;
+    margin-top: 15px;
+    border-radius: 4px;
+}
+
+.hidden {
+    display: none;
+}
+
+#racket-list div {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.action-buttons button,
+.update-section button {
+    margin-right: 10px;
+}
+
+.update-section {
+    margin-top: 20px;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px; /* Adjust font size to match inputs */
+    margin-top: 8px;
+    margin-bottom: 8px;
+    box-sizing: border-box; /* Ensure padding doesn't affect total width */
+    font-family: Arial, system-ui, "Microsoft JhengHei", sans-serif;
+    height: 40px; /* Optional: Set a consistent height */
+}
+
+/* Style for the select options */
+select option {
+    font-size: 16px;
+    font-family: Arial, system-ui, "Microsoft JhengHei", sans-serif;
+}
+
+/* Loading Overlay */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8); /* 半透明白色背景 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#loading-overlay.hidden {
+    display: none;
+}
+
+/* Spinner Animation */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ccc;
+    border-top: 5px solid #337ab7; /* 旋轉的藍色部分 */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* 隱藏不需要列印的元素 */
+    #top-bar, .button-group, #loading-overlay {
+        display: none;
+    }
+
+    /* 確保每個單據都是獨立的一頁 */
+    .print-item {
+        margin: 0;
+        padding: 10px;
+        box-shadow: none;
+        border: none;
+        /* 新增：每個單據之後都強制分頁 */
+        page-break-after: always; 
+    }
+    
+    /* 修正：避免最後一個單據後面出現多餘的空白 */
+    .print-item:last-of-type {
+        page-break-after: avoid;
+    }
+
+    h2, p {
+        margin: 0;
+        padding: 0;
+    }
+
+    h2 {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+
+    p {
+        font-size: 12px;
+        line-height: 1.2;
+    }
+    
+    * {
+        color: #000 !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+}
+
+.logout-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: #dc3545;
+    color: white;
+    cursor: pointer;
+}

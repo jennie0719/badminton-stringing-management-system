@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>列印單據</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 專為列印設計的樣式 */
+        body {
+            font-size: 14px;
+            padding: 20px;
+        }
+        @media print {
+            body { margin: 0; }
+            .print-item { page-break-after: always; }
+        }
+    </style>
+</head>
+<body>
+    <div id="print-container"></div>
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
