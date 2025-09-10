@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMessage = document.getElementById('error-message');
 
     // 替換成你的後端 API 網址，這個網址在部署後會是公開的
-    const API_BASE_URL = 'http://localhost:3000'; 
+    const API_BASE_URL = 'https://badminton-stringing-management-syst.vercel.app'; 
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();

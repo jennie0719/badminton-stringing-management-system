@@ -1,7 +1,7 @@
 // script.js
 
 // 你的後端 API 網址 (部署到 Vercel 後需要更新)
-const API_BASE_URL = 'http://localhost:3000'; 
+const API_BASE_URL = 'https://badminton-stringing-management-syst.vercel.app'; 
 
 // 從 localStorage 取得 Token
 const authToken = localStorage.getItem('authToken');
