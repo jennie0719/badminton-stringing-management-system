@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員後台</title>
+    <style>
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <button onclick="logout()">登出</button>
+    <div id="content-container" class="hidden">
+        <h1>建立新客戶</h1>
+        <form id="create-client-form">
+            <label for="name">客戶名稱:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">電子郵件:</label>
+            <input type="email" id="email" name="email" required>
+
+            <button type="submit">建立客戶</button>
+        </form>
+    </div>
+
+    <div id="access-denied-message" class="hidden">
+        <h2>權限不足</h2>
+        <p>你沒有足夠的權限來存取此頁面。</p>
+    </div>
+    
+    <script src="admin.js"></script>
+    <script src="logout.js"></script> </body>
+</html>

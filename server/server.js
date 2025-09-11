@@ -14,7 +14,6 @@ app.use(express.json());
 // 從 .env 檔案中讀取機密資訊
 const DATABASE_URL = process.env.DATABASE_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
-const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY;
 const PORT = process.env.PORT || 3000;
 
 // 連接到 PostgreSQL 資料庫
@@ -40,37 +39,15 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// ====== 路由：使用者註冊和登入 ======
-
-// 註冊新帳號 API
-app.post('/api/auth/register', async (req, res) => {
-    const { email, password, name } = req.body;
-    try {
-        const salt = await bcrypt.genSalt(10);
-        const password_hash = await bcrypt.hash(password, salt);
-        
-        // 將使用者資訊存入 tenants 資料表
-        const result = await pool.query(
-            `INSERT INTO tenants (name, email, password_hash, schema_name) 
-             VALUES ($1, $2, $3, $4) 
-             RETURNING id;`,
-            [name, email, password_hash, 'client_' + name.replace(/ /g, '_').toLowerCase()]
-        );
-        
-        // 注意：這裡只新增了使用者資料，你還需要手動在資料庫中為該客戶建立一個 schema
-        res.status(201).json({ success: true, message: '使用者建立成功' });
-    } catch (err) {
-        console.error('註冊失敗:', err.message);
-        res.status(500).json({ success: false, message: '註冊失敗，可能該帳號已存在' });
-    }
-});
+// ====== 路由：使用者登入 ======
 
 // 登入 API
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     try {
         const userResult = await pool.query(
-            `SELECT id, password_hash, schema_name FROM tenants WHERE email = $1;`,
+            // 新增一個 role 欄位
+            `SELECT id, password_hash, schema_name, role FROM tenants WHERE email = $1;`,
             [email]
         );
         if (userResult.rows.length === 0) {
@@ -84,19 +61,28 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ success: false, message: '無效的電子郵件或密碼' });
         }
         
-        // 登入成功，建立 JWT
         const payload = {
             userId: user.id,
-            schemaName: user.schema_name
+            schemaName: user.schema_name,
+            role: user.role // 將角色資訊加入 Token
         };
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
         
-        res.json({ success: true, token, schemaName: user.schema_name });
+        res.json({ success: true, token, schemaName: user.schema_name, role: user.role });
     } catch (err) {
-        console.error('登入失敗:', err.message);
         res.status(500).json({ success: false, message: '登入失敗' });
     }
 });
+
+// 新增一個中介函式，用於驗證管理員權限
+function authenticateAdmin(req, res, next) {
+    authenticateToken(req, res, () => {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: '管理員權限不足' });
+        }
+        next();
+    });
+}
 
 // ====== 路由：已驗證的使用者才能存取 ======
 
@@ -140,6 +126,93 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
         console.error('新增訂單失敗:', err.message);
         res.status(500).json({ message: '伺服器錯誤' });
     }
+});
+
+// New API endpoint for admin use only
+app.post('/api/admin/create-client', authenticateAdmin, async (req, res) => {
+    // 不再需要 adminKey 驗證，因為已經由中介函式處理
+    const { email, name } = req.body; 
+
+    try {
+        const schema_name = `client_${name.replace(/ /g, '_').toLowerCase()}`;
+
+        // 在新增使用者時，預設角色為 'client'
+        const clientResult = await pool.query(
+            `INSERT INTO tenants (name, email, schema_name) VALUES ($1, $2, $3) RETURNING id;`,
+            [name, email, schema_name]
+        );
+        
+        // 建立客戶專屬的 schema
+        await pool.query(`CREATE SCHEMA ${schema_name};`);
+
+        res.status(201).json({ success: true, message: '客戶及資料庫建立成功。請手動寄送密碼設定連結給客戶。', tenantId: clientResult.rows[0].id });
+
+    } catch (err) {
+        console.error('客戶建立失敗:', err.message);
+        res.status(500).json({ success: false, message: '客戶建立失敗，可能該帳號已存在' });
+    }
+});
+
+// A new endpoint for the admin to initiate a password reset/creation
+app.post('/api/admin/send-password-link', async (req, res) => {
+  const { email, adminKey } = req.body;
+
+  // Validate the admin key
+  if (adminKey !== process.env.ADMIN_SECRET_KEY) {
+    return res.status(403).json({ success: false, message: 'Invalid admin key.' });
+  }
+
+  try {
+    const userResult = await pool.query('SELECT id FROM tenants WHERE email = $1', [email]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    const userId = userResult.rows[0].id;
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 3600000); // Token expires in 1 hour
+
+    // Save the token to the database
+    await pool.query(
+      'UPDATE tenants SET password_reset_token = $1, password_reset_token_expires_at = $2 WHERE id = $3',
+      [token, expiresAt, userId]
+    );
+
+    // TODO: Send an email with the link
+    // The link will look like: https://<your-domain>/set-password.html?token=<the_token>
+    console.log(`Password creation link: https://your-domain/set-password.html?token=${token}`);
+
+    res.json({ success: true, message: 'Password creation link sent.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error sending link.' });
+  }
+});
+
+app.post('/api/set-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    const userResult = await pool.query(
+      'SELECT id, password_reset_token_expires_at FROM tenants WHERE password_reset_token = $1',
+      [token]
+    );
+
+    if (userResult.rows.length === 0 || new Date() > userResult.rows[0].password_reset_token_expires_at) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired token.' });
+    }
+
+    const userId = userResult.rows[0].id;
+    const password_hash = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      'UPDATE tenants SET password_hash = $1, password_reset_token = NULL, password_reset_token_expires_at = NULL WHERE id = $2',
+      [password_hash, userId]
+    );
+
+    res.json({ success: true, message: 'Password updated successfully!' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error updating password.' });
+  }
 });
 
 // 啟動伺服器
