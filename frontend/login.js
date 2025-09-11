@@ -32,7 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('schemaName', data.schemaName);
 
                 // 導向主頁面
-                window.location.href = 'index.html'; 
+                if (data.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'index.html'; 
+                } 
             } else {
                 // 登入失敗
                 errorMessage.textContent = data.message || '登入失敗，請檢查電子郵件或密碼。';
